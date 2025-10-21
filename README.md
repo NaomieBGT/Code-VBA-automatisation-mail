@@ -1,66 +1,60 @@
-# Code-VBA-automatisation-mail
-Sub EnvoiEmails()
-    Dim OutlookApp As Object
-    Dim OutlookMail As Object
-    Dim xlSheet As Worksheet
-    Dim i As Integer
-    Dim langue As String, compte As String
-    Dim destinataire As String, cc1 As String, cc2 As String, cc3 As String
-    Dim commercial As String, mailCommercial As String
-    Dim pj As String, objet As String, corps As String
+# Code-VBA-Automatisation-Mail (Tâche : Envoi d'e-mails depuis une feuille "Contacts")
 
-    ' Crée une instance d'Outlook
-    Set OutlookApp = CreateObject("Outlook.Application")
-   
-    ' Sélectionne la feuille "Contacts"
-    Set xlSheet = ThisWorkbook.Sheets("Contacts")
+Description
+-----------
+Un petit macro VBA pour Microsoft Excel qui automatise la création d'e-mails Outlook à partir d'une feuille de contacts. Conçu pour générer des brouillons d'e-mails (ou envoyer directement si modifié) contenant un sujet et un corps multilingue (fr/en), et éventuellement une pièce jointe.
 
-    i = 2 ' Commence à la ligne 2 (les données commencent à partir de la ligne 2)
+Cas d'usage
+----------
+Idéal pour envoyer des rapports périodiques (ex. "Crédit Report"), des relances ou tout message répétitif personnalisé par destinataire.
 
-    ' Boucle tant qu'il y a des données dans la colonne A
-    Do While xlSheet.Cells(i, 1).Value <> ""
-        ' Récupération des données de chaque colonne
-        langue = xlSheet.Cells(i, 1).Value
-        compte = xlSheet.Cells(i, 2).Value
-        destinataire = xlSheet.Cells(i, 3).Value
-        cc1 = xlSheet.Cells(i, 4).Value
-        cc2 = xlSheet.Cells(i, 5).Value
-        cc3 = xlSheet.Cells(i, 6).Value ' Nouvelle colonne cc3 (colonne 6)
-        commercial = xlSheet.Cells(i, 7).Value
-        mailCommercial = xlSheet.Cells(i, 8).Value
-        pj = Replace(xlSheet.Cells(i, 9).Value, """", "") ' Nettoie les guillemets
+Feuille attendue : "Contacts"
+-----------------------------
+Le macro lit chaque ligne à partir de la ligne 2. Colonnes attendues :
+- Colonne A : langue (ex: `fr` pour français, toute autre valeur -> anglais)
+- Colonne B : compte (nom du compte pour le sujet)
+- Colonne C : destinataire (adresse e-mail principale)
+- Colonne D : cc1 (adresse en copie)
+- Colonne E : cc2
+- Colonne F : cc3
+- Colonne G : commercial (nom)
+- Colonne H : mailCommercial (adresse e‑mail du commercial)
+- Colonne I : pj (chemin complet vers la pièce jointe, facultatif)
 
-        ' Création de l'objet (sujet) du mail
-        objet = "Crédit Report – " & compte & " – Avril 2025"
+Fonctionnement
+-------------
+- Le script crée une instance d'Outlook, parcourt chacune des lignes et construit un message.
+- Le sujet est : `Crédit Report – <compte> – Avril 2025` (modifiable).
+- Le corps est rédigé en français si la colonne A vaut `"fr"`, sinon en anglais.
+- Si une pièce jointe est fournie (colonne I), elle est ajoutée.
+- Les messages sont ouverts en brouillon (`.Display`). Remplacer par `.Send` pour envoyer automatiquement.
 
-        ' Corps du message selon la langue
-        If langue = "fr" Then
-            corps = "Bonjour," & vbCrLf & vbCrLf & _
-                    "Comme prévu, veuillez trouver ci-joint le Crédit Report jusqu'à fin avril 2025." & vbCrLf & vbCrLf & _
-                    "Nous avons légèrement réorganisé le document : en haut, vous trouverez un encart regroupant l’ensemble des factures émises ainsi que leurs références. En bas, votre consommation mensuelle y est détaillée mois par mois. Enfin, la colonne située en bas à gauche indique le montant des sessions non encore facturées." & vbCrLf & vbCrLf & _
-                    "Bien à vous"
-        Else
-            corps = "Hello," & vbCrLf & vbCrLf & _
-                    "As planned, please find attached the Credit Report up to the end of April 2025." & vbCrLf & vbCrLf & _
-                    "We have slightly reorganised the document: at the top, you will find an insert listing all the invoices issued and their references. At the bottom, your monthly consumption is detailed month by month. Finally, the bottom left-hand column shows the amount of sessions not yet billed." & vbCrLf & vbCrLf & _
-                    "Kind regards"
-        End If
+Installation / utilisation
+-------------------------
+1. Ouvrir le fichier Excel.
+2. Menu Développeur → Visual Basic (ou Alt+F11).
+3. Insérer un nouveau Module et coller le code VBA.
+4. Sauvegarder.
+5. Vérifier que la feuille `Contacts` existe et contient les colonnes selon la structure ci‑dessus.
+6. Lancer la macro `EnvoiEmails` (via l'éditeur VBA ou raccourci).
+7. Autoriser Outlook si une fenêtre d'autorisation apparaît.
 
-        ' Création et remplissage du mail
-        Set OutlookMail = OutlookApp.CreateItem(0)
-        With OutlookMail
-            .To = destinataire
-            ' On ajoute cc1, cc2, cc3 et le mail du commercial
-            .CC = cc1 & ";" & cc2 & ";" & cc3 & ";" & mailCommercial
-            .Subject = objet
-            .Body = corps
-            If pj <> "" Then .Attachments.Add pj ' Ajoute la pièce jointe si présente
-            .Display ' Ouvre le mail sans l’envoyer (utilise .Send pour envoi direct)
-        End With
+Bonnes pratiques et sécurité
+----------------------------
+- Ne pas utiliser `.Send` avant d'avoir testé sur quelques lignes : `.Send` envoie réellement les emails.
+- Ne pas stocker ou partager des informations sensibles dans le fichier sans contrôle d'accès.
+- Vérifier les chemins de pièce jointe. Si le fichier n’existe pas, la macro peut échouer.
+- Respecter la confidentialité des destinataires (BCC si nécessaire).
 
-        i = i + 1 ' Passe à la ligne suivante
-    Loop
+Améliorations possibles
+-----------------------
+- Nettoyage de la liste CC pour n'ajouter que les adresses non vides.
+- Verification d'existence du fichier joint avant ajout.
+- Ajout d'une colonne "Envoyer" (Oui/Non) pour filtrer les envois.
+- Ajout d'un log d'activité (nouvelle feuille "Log").
+- Génération dynamique du mois/année dans le sujet.
+- Gestion d'erreurs (On Error) et notifications d'échec par ligne.
 
-    ' Message de confirmation à la fin
-    MsgBox "Tous les mails ont été générés."
-End Sub
+Exemple rapide d'amélioration (pseudo) :
+- Filtrer les CC vides avant de faire `.CC = ...`
+- If Len(Trim(cc1)) > 0 Then add cc1 to list
