@@ -46,15 +46,4 @@ Bonnes pratiques et sécurité
 - Vérifier les chemins de pièce jointe. Si le fichier n’existe pas, la macro peut échouer.
 - Respecter la confidentialité des destinataires (BCC si nécessaire).
 
-Améliorations possibles
------------------------
-- Nettoyage de la liste CC pour n'ajouter que les adresses non vides.
-- Verification d'existence du fichier joint avant ajout.
-- Ajout d'une colonne "Envoyer" (Oui/Non) pour filtrer les envois.
-- Ajout d'un log d'activité (nouvelle feuille "Log").
-- Génération dynamique du mois/année dans le sujet.
-- Gestion d'erreurs (On Error) et notifications d'échec par ligne.
 
-Exemple rapide d'amélioration (pseudo) :
-- Filtrer les CC vides avant de faire `.CC = ...`
-- If Len(Trim(cc1)) > 0 Then add cc1 to list
